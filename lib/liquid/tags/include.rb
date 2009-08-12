@@ -23,33 +23,33 @@ module Liquid
     def parse(tokens)      
     end
   
-    def render(context)      
-      source  = Liquid::Template.file_system.read_template_file(context[@template_name])      
-      partial = Liquid::Template.parse(source)      
-      
-      variable = context[@variable_name || @template_name[1..-2]]
-      
+    def render(context) 
+      partial = PartialTemplate.find_by_name(context[@template_name])      
+    
+    
+      variable = context[@variable_name]
+    
       context.stack do
         @attributes.each do |key, value|
           context[key] = context[value]
         end
 
         if variable.is_a?(Array)
-          
-          variable.collect do |variable|            
+        
+          variable.collect do |variable|
             context[@template_name[1..-2]] = variable
-            partial.render(context)
+            partial.parsed_code.render(context)
           end
 
         else
-                    
+                  
           context[@template_name[1..-2]] = variable
-          partial.render(context)
-          
+          partial.parsed_code.render(context)
+        
         end
       end
     end
   end
-
-  Template.register_tag('include', Include)  
+  
+  Liquid::Template.register_tag('include', Include)  
 end
